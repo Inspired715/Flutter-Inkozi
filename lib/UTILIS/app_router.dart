@@ -11,6 +11,8 @@ import 'package:inkozi/screens/USER/AUTH/LOGIN/V/login.dart';
 import '../screens/question/QuestionSend.dart';
 import '../screens/screens.dart';
 
+import 'package:inkozi/screens/message/testChat_view.dart';
+
 class AppRouter {
   static Route onGenerateRoute(RouteSettings setting) {
     print('This is route: ${setting.name}');
@@ -99,6 +101,9 @@ class AppRouter {
         return UserAllChats.route();
       case EditProfileLAwyer.routeName:
         return EditProfileLAwyer.route();
+
+      case TestChat.routeName:
+        return TestChat.route(setting.arguments);
 
       default:
         return _errorRoute();

@@ -55,7 +55,7 @@ class _InitialScreenState extends State<InitialScreen> {
             Center(
               child: Container(
                 width: 300.w,
-                height: 280.h,
+                height: 360.h,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.sp),
                     color: bgColor,
@@ -103,7 +103,35 @@ class _InitialScreenState extends State<InitialScreen> {
                             Navigator.pushNamed(context, '/loginuser');
                           },
                         ),
-                      )
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 0),
+                        child: ButtonWithBg(
+                          btnName: 'Test Chat as User',
+                          width: width,
+                          onPress: () {
+                            Navigator.pushNamed(context, '/testChat',
+                                arguments: {'role': 'user'});
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 0),
+                        child: ButtonWithBg(
+                          btnName: 'Test Chat as Laywer',
+                          width: width,
+                          onPress: () {
+                            Navigator.pushNamed(context, '/testChat',
+                                arguments: {'role': 'laywer'});
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),
