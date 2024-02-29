@@ -50,10 +50,11 @@ class MessageChatController extends GetxController {
     var map = {
       'INKOZI-API-KEY': 'MG5tj4wNbrb48yFD100',
       'question_id': question_id,
-      'sender': StaticValues.userInfo!.userId,
-      'reciver': reciver,
+      'sender_id': reciver,
+      'user_id': StaticValues.userInfo!.userId,
       'message': message
     };
+
     var response = await httpClient().post(url, data: map);
     if (response.statusCode == 200) {}
   }
@@ -65,27 +66,16 @@ class MessageChatController extends GetxController {
   }) {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-
-    messageList!.add(
-      ChatLog(
-        message: messageController.text,
-        questionId: questionId,
-        reciver: reciver,
-        sender: StaticValues.userInfo!.userId,
-        timeChat: formattedDate,
-      ),
-    );
+    String sendingtext = messageController.text;
 
     socket!.emit('live_notify', {
-      'message': messageController.text,
-      'advisor_id': reciver,
+      'message': sendingtext,
       'user_id': StaticValues.userInfo!.userId,
       'question_id': questionId,
-      'sender_id': StaticValues.userInfo!.userId,
+      'sender_id': reciver,
       'time_chat': formattedDate,
     });
 
-    String sendingtext = messageController.text;
     messageController.clear();
     update();
     // send

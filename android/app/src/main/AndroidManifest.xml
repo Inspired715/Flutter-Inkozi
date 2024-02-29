@@ -47,7 +47,7 @@
         
         <!-- Google Map API -->
         <meta-data android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyBVzb8k5ay8mma3gfgnq__9SSGTyvjWaSo"/>
+        android:value="AIzaSyDqXEILGxRWDbtS_QXDRG0xl-vaphisttU"/>
 
         <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>

@@ -8,6 +8,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:inkozi/UTILIS/colors.dart';
 import 'package:inkozi/UTILIS/text_style.dart';
 import 'package:inkozi/widgets/CustomAppBar.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class MessageLawyerScreen extends StatefulWidget {
   const MessageLawyerScreen(
@@ -24,6 +25,69 @@ class MessageLawyerScreen extends StatefulWidget {
 }
 
 class _MessageLawyerScreenState extends State<MessageLawyerScreen> {
+  IO.Socket? socket;
+  void connectToServer() {
+    socket = IO.io('https://www.inkozi.com:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    // Handle connection successful
+    socket?.onConnect((_) {
+      print('Connected');
+    });
+
+    // Handle connection error
+    socket?.onConnectError((error) {
+      print('Connection error: $error');
+    });
+
+    // Handle connection timeout
+    socket?.onConnectTimeout((_) {
+      print('Connection timeout');
+    });
+
+    // Handle disconnection
+    socket?.onDisconnect((_) {
+      print('Disconnected');
+    });
+
+    // Handle error
+    socket?.onError((error) {
+      print('Error: $error');
+    });
+
+    // Connect to the server
+    socket?.connect();
+
+    // Listen for messages
+    socket?.on('live_notify', (data) {
+      ChatLog model = ChatLog(
+        questionId: data['question_id'],
+        reciver: data['sender_id'],
+        sender: data['user_id'],
+        timeChat: data['time_chat'],
+        message: data['message'],
+      );
+
+      MessageLawyerController.to.messageList!.add(model);
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    connectToServer();
+  }
+
+  @override
+  void dispose() {
+    //messageController.dispose();
+    socket?.disconnect();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -120,24 +184,6 @@ class _MessageLawyerScreenState extends State<MessageLawyerScreen> {
                                   ),
                                 );
                               },
-                              // groupHeaderBuilder: (ChatLog message) => Center(
-                              //   child: Container(
-                              //     padding: EdgeInsets.symmetric(
-                              //         horizontal: 10.w, vertical: 3.h),
-                              //     decoration: BoxDecoration(
-                              //       borderRadius: BorderRadius.circular(20),
-                              //       color: primaryColor,
-                              //     ),
-                              //     child: Text(
-                              //       DateTime.parse(message.timeChat!).day ==
-                              //               DateTime.now().day
-                              //           ? 'Today'
-                              //           : DateFormat.yMMMd().format(
-                              //               DateTime.parse(message.timeChat!)),
-                              //       style: CustomTextStyle.bc14med,
-                              //     ),
-                              //   ),
-                              // ),
                               itemBuilder: (context, ChatLog message) => Align(
                                 alignment: message.sender ==
                                         StaticValues.lawyerInfo!.advisorId
@@ -203,6 +249,7 @@ class _MessageLawyerScreenState extends State<MessageLawyerScreen> {
                               obj.addmessagetodummielist(
                                 questionId: widget.questionID,
                                 reciver: widget.receiverID,
+                                socket: socket!,
                               );
                             }
                           },
@@ -215,24 +262,6 @@ class _MessageLawyerScreenState extends State<MessageLawyerScreen> {
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.only(top: 5),
-                            //   border: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
-                            //   enabledBorder: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
-                            //   focusedBorder: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
                             hintText: 'Type your message here',
                             hintStyle: TextStyle(
                               fontSize: 14.sp,
@@ -242,44 +271,17 @@ class _MessageLawyerScreenState extends State<MessageLawyerScreen> {
                           ),
                         ),
                       ),
-                      // Container(
-                      //   width: 30.w,
-                      //   padding: EdgeInsets.only(top: 5.h),
-                      //   decoration: BoxDecoration(),
-                      //   child: Center(
-                      //     child: Image.asset(
-                      //       'assets/icons/emoji.png',
-                      //       height: 18.h,
-                      //     ),
-                      //   ),
-                      // ),
                       Padding(
                         padding: EdgeInsets.only(top: 5.h),
                         child: Row(
                           children: [
-                            // SizedBox(
-                            //   width: 5.w,
-                            // ),
-                            // GestureDetector(
-                            //   onTap: () {},
-                            //   child: Container(
-                            //     height: 30.h,
-                            //     width: 40.w,
-                            //     color: Colors.transparent,
-                            //     child: Center(
-                            //       child: Image.asset(
-                            //         'assets/icons/link.png',
-                            //         height: 18.h,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
                             GestureDetector(
                               onTap: () {
                                 if (obj.messageController.text.isNotEmpty) {
                                   obj.addmessagetodummielist(
                                     questionId: widget.questionID,
                                     reciver: widget.receiverID,
+                                    socket: socket!,
                                   );
                                 }
                               },

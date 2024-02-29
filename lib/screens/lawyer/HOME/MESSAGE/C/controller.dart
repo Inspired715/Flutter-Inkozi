@@ -1,14 +1,12 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:http/http.dart' as http;
-
 import 'package:inkozi/api_serivices/api_serivices.dart';
 import 'package:inkozi/screens/LAWYER/HOME/MESSAGE/M/model.dart';
 import 'package:intl/intl.dart';
 import 'package:inkozi/constrains/app_constrains.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class MessageLawyerController extends GetxController {
   static MessageLawyerController get to => Get.find();
@@ -48,8 +46,8 @@ class MessageLawyerController extends GetxController {
     var map = {
       'INKOZI-API-KEY': 'MG5tj4wNbrb48yFD100',
       'question_id': question_id,
-      'sender': StaticValues.lawyerInfo!.advisorId,
-      'reciver': reciver,
+      'sender_id': reciver,
+      'user_id': StaticValues.lawyerInfo!.advisorId,
       'message': message
     };
     var response = await httpClient().post(url, data: map);
@@ -59,20 +57,20 @@ class MessageLawyerController extends GetxController {
   void addmessagetodummielist({
     required String reciver,
     required String questionId,
+    required IO.Socket? socket,
   }) {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-
-    messageList!.add(
-      ChatLog(
-        message: messageController.text,
-        questionId: questionId,
-        reciver: reciver,
-        sender: StaticValues.lawyerInfo!.advisorId,
-        timeChat: formattedDate,
-      ),
-    );
     String sendingtext = messageController.text;
+
+    socket!.emit('live_notify', {
+      'message': sendingtext,
+      'user_id': StaticValues.lawyerInfo!.advisorId,
+      'question_id': questionId,
+      'sender_id': reciver,
+      'time_chat': formattedDate,
+    });
+
     messageController.clear();
     update();
     // send

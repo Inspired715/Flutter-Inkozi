@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:inkozi/constrains/app_constrains.dart';
 import 'package:inkozi/screens/LAWYER/HOME/MESSAGE/M/model.dart';
@@ -10,7 +9,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:inkozi/UTILIS/colors.dart';
 import 'package:inkozi/UTILIS/text_style.dart';
 import 'package:inkozi/widgets/CustomAppBar.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class MessageUserScreen extends StatefulWidget {
   const MessageUserScreen({
@@ -28,65 +27,75 @@ class MessageUserScreen extends StatefulWidget {
 }
 
 class _MessageUserScreenState extends State<MessageUserScreen> {
-  io.Socket? socket;
+  IO.Socket? socket;
   ScrollController _scrollController = ScrollController();
-  void connect() {
-    socket = io.io("https://www.inkozi.com:3000", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
+
+  void connectToServer() {
+    socket = IO.io('https://www.inkozi.com:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
     });
-    socket!.connect();
-    log("socket connection ${socket!.connected}");
-    socket!.onConnect((data) {
-      log("Connected");
-      socket!.on('live_notify', (msg) {
-        log(msg);
 
-        ChatLog model = ChatLog(
-          questionId: data['question_id'],
-          reciver: data['advisor_id'],
-          sender: data['sender_id'],
-          timeChat: data['time_chat'],
-          message: data['message'],
-        );
+    // Handle connection successful
+    socket?.onConnect((_) {
+      print('Connected');
+    });
 
-        MessageChatController.to.messageList!.add(model);
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-        setState(() {});
-      });
+    // Handle connection error
+    socket?.onConnectError((error) {
+      print('Connection error: $error');
+    });
+
+    // Handle connection timeout
+    socket?.onConnectTimeout((_) {
+      print('Connection timeout');
+    });
+
+    // Handle disconnection
+    socket?.onDisconnect((_) {
+      print('Disconnected');
+    });
+
+    // Handle error
+    socket?.onError((error) {
+      print('Error: $error');
+    });
+
+    // Connect to the server
+    socket?.connect();
+
+    // Listen for messages
+    socket?.on('live_notify', (data) {
+      ChatLog model = ChatLog(
+        questionId: data['question_id'],
+        reciver: data['sender_id'],
+        sender: data['user_id'],
+        timeChat: data['time_chat'],
+        message: data['message'],
+      );
+
+      MessageChatController.to.messageList!.add(model);
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      setState(() {});
     });
   }
 
-  // void connect() {
-  //   socket = IO.io(
-  //       'https://www.inkozi.com:3000',
-  //       IO.OptionBuilder()
-  //           .setTransports(['websocket']) // for Flutter or Dart VM
-  //           .disableAutoConnect() // disable auto-connection
-  //           .setExtraHeaders({'foo': 'bar'}) // optional
-  //           .build());
-  //   socket!.connect();
-  //   socket!.onConnect((data) {
-  //     socket!.on('live_notify', (data) {
-  //       print(data);
-  //     });
-  //   });
-
-  //   print("Flutter connect ${socket!.connected}");
-  // }
-
   @override
   void initState() {
-    connect();
     super.initState();
+    connectToServer();
+  }
+
+  @override
+  void dispose() {
+    //messageController.dispose();
+    socket?.disconnect();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    connect();
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(
@@ -262,24 +271,6 @@ class _MessageUserScreenState extends State<MessageUserScreen> {
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.only(top: 5),
-                            //   border: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
-                            //   enabledBorder: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
-                            //   focusedBorder: UnderlineInputBorder(
-                            //     borderSide: BorderSide(
-                            //       color: primaryColor,
-                            //       width: 1.w,
-                            //     ),
-                            //   ),
                             hintText: 'Type your message here',
                             hintStyle: TextStyle(
                               fontSize: 14.sp,
@@ -289,38 +280,10 @@ class _MessageUserScreenState extends State<MessageUserScreen> {
                           ),
                         ),
                       ),
-                      // Container(
-                      //   width: 30.w,
-                      //   padding: EdgeInsets.only(top: 5.h),
-                      //   decoration: BoxDecoration(),
-                      //   child: Center(
-                      //     child: Image.asset(
-                      //       'assets/icons/emoji.png',
-                      //       height: 18.h,
-                      //     ),
-                      //   ),
-                      // ),
                       Padding(
                         padding: EdgeInsets.only(top: 5.h),
                         child: Row(
                           children: [
-                            // SizedBox(
-                            //   width: 5.w,
-                            // ),
-                            // GestureDetector(
-                            //   onTap: () {},
-                            //   child: Container(
-                            //     height: 30.h,
-                            //     width: 40.w,
-                            //     color: Colors.transparent,
-                            //     child: Center(
-                            //       child: Image.asset(
-                            //         'assets/icons/link.png',
-                            //         height: 18.h,
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
                             GestureDetector(
                               onTap: () {
                                 if (obj.messageController.text.isNotEmpty) {

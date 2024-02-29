@@ -42,8 +42,8 @@ class ChatLog {
       this.questionId});
 
   ChatLog.fromJson(Map<String, dynamic> json) {
-    sender = json['sender'];
-    reciver = json['reciver'];
+    sender = json['user_id'];
+    reciver = json['sender_id'];
     timeChat = json['time_chat'];
     message = json['message'];
     questionId = json['question_id'];
